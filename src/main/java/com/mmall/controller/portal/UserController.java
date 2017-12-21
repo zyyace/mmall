@@ -43,4 +43,9 @@ public class UserController
         return ServiceResponse.createBySuccess();
     }
 
+    @RequestMapping(value ="register.do",method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<String> register(User user){
+        return iUserService.register(user);
+    }
 }

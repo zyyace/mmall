@@ -35,4 +35,12 @@ public class UserController
         return response;
         // service-->mybatis->dao
     }
+
+    @RequestMapping(value ="login.do",method = RequestMethod.GET)
+    @ResponseBody
+    public ServiceResponse<String> logout(HttpSession session){
+        session.removeAttribute(Const.CURRENT_USER);
+        return ServiceResponse.createBySuccess();
+    }
+
 }

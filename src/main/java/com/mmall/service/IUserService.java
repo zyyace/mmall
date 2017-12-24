@@ -7,4 +7,5 @@ public interface IUserService {
 
     ServiceResponse<User> login(String username, String password);
     ServiceResponse<String> register (User user);
+    ServiceResponse<String> checkValid (String str,String type);
 }

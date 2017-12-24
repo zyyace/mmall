@@ -6,6 +6,7 @@ import com.mmall.dao.UserMapper;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
+import org.aspectj.lang.annotation.DeclareError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,21 +39,50 @@ public class UserServiceImpl implements IUserService{
     }
 
     public ServiceResponse<String> register (User user){
-        int resultCount = userMapper.checkUsername(user.getUsername());
-        if(resultCount > 0 ) {
-            return ServiceResponse.createByErrorMessage("用户名已存在");
+        ServiceResponse validResponse = this.checkValid(user.getUsername(),Const.USERNAME);
+        if(!validResponse.isSuccess()){
+            return validResponse;
         }
-        resultCount = userMapper.checkUsername(user.getEmail());
-        if(resultCount > 0 ) {
-            return ServiceResponse.createByErrorMessage("email已存在");
+        validResponse = this.checkValid(user.getEmail(),Const.EMAIL);
+        if(!validResponse.isSuccess()){
+            return validResponse;
         }
+//        int resultCount = userMapper.checkUsername(user.getUsername());
+//        if(resultCount > 0 ) {
+//            return ServiceResponse.createByErrorMessage("用户名已存在");
+//        }
+//        resultCount = userMapper.checkUsername(user.getEmail());
+//        if(resultCount > 0 ) {
+//            return ServiceResponse.createByErrorMessage("email已存在");
+//        }
         user.setRole(Const.Role.ROLE_CUSTOMER);
         // md5加密
         user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
-        resultCount = userMapper.insert(user);
+        int resultCount = userMapper.insert(user);
         if(resultCount == 0){
             return ServiceResponse.createByErrorMessage("注册失败");
         }
         return ServiceResponse.createBySuccessMessage("注册成功");
+    }
+
+    public ServiceResponse<String> checkValid (String str,String type){
+        if(org.apache.commons.lang3.StringUtils.isNoneBlank(type)){
+            // 开始校验
+            if(Const.USERNAME.equals(type)){
+                int resultCount = userMapper.checkUsername(str);
+                if(resultCount > 0){
+                    return ServiceResponse.createByErrorMessage("用户名已经存在");
+                }
+            }
+            if(Const.EMAIL.equals(type)){
+                int resultCount = userMapper.checkEmail(type);
+                if(resultCount > 0){
+                    return ServiceResponse.createByErrorMessage("email已经存在");
+                }
+            }
+        }else{
+            return ServiceResponse.createBySuccessMessage("参数错误");
+        }
+        return ServiceResponse.createBySuccessMessage("校验成功");
     }
 }
